@@ -163,7 +163,14 @@ module Beaker
 
       options[:recursive]=File.directory?(source) if options[:recursive].nil?
 
-      @ssh.scp.upload! source, target, options
+      @ssh.scp.upload! source, target
+
+      Dir.foreach(source) do |x|
+        next if x.match(/^\./)
+        src = File.join(source, x)
+        dst = File.join(target, x)
+        @ssh.scp.upload! src, dst, options
+      end
 
       result = Result.new(@hostname, [source, target])
 
